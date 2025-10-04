@@ -8,6 +8,8 @@ use App\Repository\NotificationRepository;
 use App\Validation\NotificationValidation;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class NotificationDomain
 {
@@ -25,6 +27,20 @@ class NotificationDomain
     }
 
     /**
+     * Fetch a notification
+     */
+    public function getNotification(int $id): ?Notification
+    {
+        $notification = $this->repository->find($id);
+
+        if (!$notification) {
+            throw new NotFoundHttpException(sprintf('Notification with id %s not found.', $id));
+        }
+
+        return $notification;
+    }
+
+    /**
      * Create new notification
      */
     public function createNotification(NotificationValidation $data): Notification
@@ -36,6 +52,26 @@ class NotificationDomain
         $notification->setBody($data->body);
         $notification->setStatus(NotificationStatus::PENDING);
         $notification->setCreatedAt(new DateTimeImmutable());
+
+        $this->em->persist($notification);
+        $this->em->flush();
+
+        return $notification;
+    }
+
+    /**
+     * Send a notification
+     */
+    public function sendNotification(int $id): Notification
+    {
+        $notification = $this->getNotification($id);
+
+        if ($notification->getStatus() === NotificationStatus::SENT) {
+            throw new BadRequestHttpException(sprintf('Notification with id %s has already been sent.', $id));
+        }
+
+        $notification->setStatus(NotificationStatus::SENT);
+        $notification->setSentAt(new DateTimeImmutable());
 
         $this->em->persist($notification);
         $this->em->flush();
