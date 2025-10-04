@@ -5,15 +5,18 @@ namespace App\Controller;
 use App\Dto\NotificationDto;
 use App\Entity\Notification;
 use OpenApi\Attributes as OA;
-use App\Repository\NotificationRepository;
+use App\Domain\NotificationDomain;
+use App\Validation\NotificationValidation;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[Route('/api/notifications', name: 'api_notifications_')]
 final class NotificationController extends AbstractController
 {
-    public function __construct(private readonly NotificationRepository $notificationRepository) {}
+    public function __construct(private readonly NotificationDomain $domain) {}
 
     #[Route('', name: 'list', methods: ['GET'])]
     #[OA\Get(
@@ -31,7 +34,7 @@ final class NotificationController extends AbstractController
                     new OA\Property(property: 'id', type: 'integer', example: 1),
                     new OA\Property(property: 'recipientEmail', type: 'string', example: 'recipient@example.com'),
                     new OA\Property(property: 'subject', type: 'string', example: 'Welcome!'),
-                    new OA\Property(property: 'body', type: 'string', example: 'Welcome to our platform'),
+                    new OA\Property(property: 'body', type: 'string', example: 'Welcome to our platform.'),
                     new OA\Property(property: 'status', type: 'string', example: 'pending'),
                     new OA\Property(property: 'createdAt', type: 'string', example: '2025-01-01 00:00:00'),
                     new OA\Property(property: 'sentAt', type: 'string', example: '2025-01-01 00:01:00'),
@@ -41,13 +44,59 @@ final class NotificationController extends AbstractController
     )]
     public function index(): JsonResponse
     {
-        $notifications = $this->notificationRepository->findAll();
+        $notifications = $this->domain->getNotifications();
 
-        $notificationDtos = array_map(
+        $dtos = array_map(
             fn(Notification $notification) => NotificationDto::create($notification),
             $notifications
         );
 
-        return $this->json($notificationDtos);
+        return $this->json($dtos);
+    }
+
+    #[Route('', name: 'create', methods: ['POST'])]
+    #[OA\Post(
+        path: '/api/notifications',
+        summary: 'Create a new notification',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['recipientEmail', 'subject', 'body'],
+                properties: [
+                    new OA\Property(
+                        property: 'recipientEmail',
+                        type: 'string',
+                        format: 'email',
+                        example: 'recipient@example.com'
+                    ),
+                    new OA\Property(
+                        property: 'subject',
+                        type: 'string',
+                        example: 'Welcome!'
+                    ),
+                    new OA\Property(
+                        property: 'body',
+                        type: 'string',
+                        example: 'Welcome to our platform.'
+                    ),
+                ]
+            )
+        ),
+        tags: ['Notifications']
+    )]
+    #[OA\Response(
+        response: 201,
+        description: 'Notification created successfully'
+    )]
+    #[OA\Response(
+        response: 400,
+        description: 'Invalid input data'
+    )]
+    public function create(#[MapRequestPayload(validationGroups: ['create'])] NotificationValidation $data): JsonResponse
+    {
+        $notification = $this->domain->createNotification($data);
+        $dto = NotificationDto::create($notification);
+
+        return $this->json($dto, Response::HTTP_CREATED);
     }
 }
