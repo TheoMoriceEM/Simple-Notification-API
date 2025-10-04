@@ -12,6 +12,8 @@ class NotificationDto
         public readonly string $subject,
         public readonly string $body,
         public readonly string $status,
+        public readonly string $createdAt,
+        public readonly ?string $sentAt,
     ) {}
 
     public static function create(Notification $notification): self
@@ -22,6 +24,8 @@ class NotificationDto
             subject: $notification->getSubject(),
             body: $notification->getBody(),
             status: $notification->getStatus()->value,
+            createdAt: $notification->getCreatedAt()->format('Y-m-d H:i:s'),
+            sentAt: $notification->getSentAt()?->format('Y-m-d H:i:s'),
         );
     }
 }

@@ -33,6 +33,8 @@ final class NotificationController extends AbstractController
                     new OA\Property(property: 'subject', type: 'string', example: 'Welcome!'),
                     new OA\Property(property: 'body', type: 'string', example: 'Welcome to our platform'),
                     new OA\Property(property: 'status', type: 'string', example: 'pending'),
+                    new OA\Property(property: 'createdAt', type: 'string', example: '2025-01-01 00:00:00'),
+                    new OA\Property(property: 'sentAt', type: 'string', example: '2025-01-01 00:01:00'),
                 ]
             )
         )
