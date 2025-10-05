@@ -54,7 +54,6 @@ class NotificationDomain
         $notification->setSubject($data->subject);
         $notification->setBody($data->body);
         $notification->setStatus(NotificationStatus::PENDING);
-        $notification->setCreatedAt(new DateTimeImmutable());
 
         $this->em->persist($notification);
         $this->em->flush();

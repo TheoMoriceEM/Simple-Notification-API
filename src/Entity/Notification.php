@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Enum\NotificationStatus;
 use App\Repository\NotificationRepository;
+use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -32,6 +33,11 @@ class Notification
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $sentAt = null;
+
+    public function __construct()
+    {
+        $this->createdAt = new DateTimeImmutable();
+    }
 
     public function getId(): ?int
     {
@@ -89,13 +95,6 @@ class Notification
     public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
     }
 
     public function getSentAt(): ?\DateTimeImmutable
