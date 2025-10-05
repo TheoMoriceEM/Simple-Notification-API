@@ -4,18 +4,21 @@ namespace App\Domain;
 
 use App\Entity\Notification;
 use App\Enum\NotificationStatus;
+use App\Message\EmailNotification;
 use App\Repository\NotificationRepository;
 use App\Validation\NotificationValidation;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 class NotificationDomain
 {
     public function __construct(
         private readonly NotificationRepository $repository,
         private readonly EntityManagerInterface $em,
+        private readonly MessageBusInterface $bus,
     ) {}
 
     /**
@@ -70,11 +73,7 @@ class NotificationDomain
             throw new BadRequestHttpException(sprintf('Notification with id %s has already been sent.', $id));
         }
 
-        $notification->setStatus(NotificationStatus::SENT);
-        $notification->setSentAt(new DateTimeImmutable());
-
-        $this->em->persist($notification);
-        $this->em->flush();
+        $this->bus->dispatch(new EmailNotification($id));
 
         return $notification;
     }
