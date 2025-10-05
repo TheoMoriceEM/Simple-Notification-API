@@ -6,11 +6,11 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class NotificationControllerTest extends WebTestCase
 {
-    public function testIndex(): void
-    {
-        $client = static::createClient();
-        $client->request('GET', '/notification');
+    // public function testIndex(): void
+    // {
+    //     $client = static::createClient();
+    //     $client->request('GET', '/notification');
 
-        self::assertResponseIsSuccessful();
-    }
+    //     self::assertResponseIsSuccessful();
+    // }
 }

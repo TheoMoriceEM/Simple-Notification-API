@@ -20,7 +20,7 @@ class EmailService
         sleep(3); // Simulate short delay for sending email...
 
         // Simulate a random failure once in a while
-        if (rand(1, 100) <= 10) {
+        if ($this->sendingMailHasFailed()) {
             $this->logger->error('Email sending failed.', [
                 'recipient_email' => $notification->getRecipientEmail(),
             ]);
@@ -30,5 +30,10 @@ class EmailService
         $this->logger->debug('Email sent successfully!', [
             'recipient_email' => $notification->getRecipientEmail(),
         ]);
+    }
+
+    public function sendingMailHasFailed()
+    {
+        return rand(1, 100) <= 10;
     }
 }

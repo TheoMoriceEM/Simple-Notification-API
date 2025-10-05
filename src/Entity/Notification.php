@@ -26,7 +26,7 @@ class Notification
     private ?string $body = null;
 
     #[ORM\Column(enumType: NotificationStatus::class)]
-    private ?NotificationStatus $status = null;
+    private NotificationStatus $status = NotificationStatus::PENDING;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;

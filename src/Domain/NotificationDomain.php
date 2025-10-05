@@ -53,7 +53,6 @@ class NotificationDomain
         $notification->setRecipientEmail($data->recipientEmail);
         $notification->setSubject($data->subject);
         $notification->setBody($data->body);
-        $notification->setStatus(NotificationStatus::PENDING);
 
         $this->em->persist($notification);
         $this->em->flush();
