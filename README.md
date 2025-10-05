@@ -1,51 +1,159 @@
-# Symfony Docker
+# Simple Notification API
 
-A [Docker](https://www.docker.com/)-based installer and runtime for the [Symfony](https://symfony.com) web framework,
-with [FrankenPHP](https://frankenphp.dev) and [Caddy](https://caddyserver.com/) inside!
+## 🎯 Overview
 
-![CI](https://github.com/dunglas/symfony-docker/workflows/CI/badge.svg)
+This project implements a notification system with the following capabilities:
+- Create email notifications via REST API
+- List all notifications
+- Send notifications asynchronously using Symfony Messenger
+- Automatic retry mechanism on failure
+- Proper error handling and logging
 
-## Getting Started
+## ✨ Features
 
-1. If not already done, [install Docker Compose](https://docs.docker.com/compose/install/) (v2.10+)
-2. Run `docker compose build --pull --no-cache` to build fresh images
-3. Run `docker compose up --wait` to set up and start a fresh Symfony project
-4. Open `https://localhost` in your favorite web browser and [accept the auto-generated TLS certificate](https://stackoverflow.com/a/15076602/1352334)
-5. Run `docker compose down --remove-orphans` to stop the Docker containers.
+- **RESTful API** with JSON responses
+- **Asynchronous email sending** via Symfony Messenger
+- **Status tracking**: `pending`, `sent`, `failed`
+- **Automatic retry** up to 3 attempts
+- **Input validation** with detailed error messages
+- **OpenAPI/Swagger documentation** at `/api/doc`
+- **Comprehensive test suite**
+- **Clean architecture** with domain services and DTOs
 
-## Features
+## 🏗️ Architecture principles
 
-- Production, development and CI ready
-- Just 1 service by default
-- Blazing-fast performance thanks to [the worker mode of FrankenPHP](https://github.com/dunglas/frankenphp/blob/main/docs/worker.md) (automatically enabled in prod mode)
-- [Installation of extra Docker Compose services](docs/extra-services.md) with Symfony Flex
-- Automatic HTTPS (in dev and prod)
-- HTTP/3 and [Early Hints](https://symfony.com/blog/new-in-symfony-6-3-early-hints) support
-- Real-time messaging thanks to a built-in [Mercure hub](https://symfony.com/doc/current/mercure.html)
-- [Vulcain](https://vulcain.rocks) support
-- Native [XDebug](docs/xdebug.md) integration
-- Super-readable configuration
+- **Domain-Driven Design**: Business logic split into domain services
+- **SOLID principles**: Single responsibility, dependency injection
+- **DTO pattern**: Clean separation between API contracts and entities
+- **Event-driven architecture**: Asynchronous processing with Symfony Messenger
 
-**Enjoy!**
+## 📦 Technical stack
 
-## Docs
+- PHP 8.2+
+- Symfony 7.3+
+- PostgreSQL 16+
+- Docker & Docker Compose (optional)
 
-1. [Options available](docs/options.md)
-2. [Using Symfony Docker with an existing project](docs/existing-project.md)
-3. [Support for extra services](docs/extra-services.md)
-4. [Deploying in production](docs/production.md)
-5. [Debugging with Xdebug](docs/xdebug.md)
-6. [TLS Certificates](docs/tls.md)
-7. [Using MySQL instead of PostgreSQL](docs/mysql.md)
-8. [Using Alpine Linux instead of Debian](docs/alpine.md)
-9. [Using a Makefile](docs/makefile.md)
-10. [Updating the template](docs/updating.md)
-11. [Troubleshooting](docs/troubleshooting.md)
+## 🚀 Installation
 
-## License
+### 1. Clone the repository
+```bash
+git clone https://github.com/TheoMoriceEM/Simple-Notification-API.git
+cd Simple-Notification-API
+```
 
-Symfony Docker is available under the MIT License.
+### 2. Start Docker containers (optional)
+```bash
+docker compose up -d
+```
 
-## Credits
+### 3. Install dependencies
+```bash
+docker exec -it simple-notification-api-php-1 composer install
+```
 
-Created by [Kévin Dunglas](https://dunglas.dev), co-maintained by [Maxime Helias](https://twitter.com/maxhelias) and sponsored by [Les-Tilleuls.coop](https://les-tilleuls.coop).
+### 4. Setup database
+```bash
+# Create database
+docker exec -it simple-notification-api-php-1 php bin/console doctrine:database:create
+
+# Run migrations
+docker exec -it simple-notification-api-php-1 php bin/console doctrine:migrations:migrate
+
+# Setup Messenger transport tables
+docker exec -it simple-notification-api-php-1 php bin/console messenger:setup-transports
+```
+
+### 5. Start the Messenger worker
+```bash
+docker exec -it simple-notification-api-php-1 php bin/console messenger:consume async
+```
+
+The API is now available at http://localhost  
+And the Swagger UI at: http://localhost/api/doc
+
+## 🧪 Testing
+
+### Run Tests
+```bash
+# Setup test database
+docker exec -it simple-notification-api-php-1 php bin/console doctrine:database:create --env=test
+docker exec -it simple-notification-api-php-1 php bin/console doctrine:schema:create --env=test
+
+# Run all tests
+docker exec -it simple-notification-api-php-1 php bin/phpunit
+```
+
+## 🤔 Technical Decisions
+
+### 1. Asynchronous Processing with Symfony Messenger
+
+#### Why
+Sending emails synchronously can block HTTP requests and degrade the user experience.  
+
+#### Consequences
+
+✅ Fast API responses  
+✅ Automatic retry on failure  
+✅ Horizontal scalability  
+⚠️ Requires running worker process  
+⚠️ Data consistency (e.g. status updates are async)
+
+### 2. Domain Service Layer
+
+#### Why
+Separate business logic from HTTP concerns.
+
+#### Benefits
+
+✅ Reusable across controllers, CLI commands, and tests  
+✅ Easier to test (no HTTP mocking needed)
+
+### 3. DTO Pattern
+
+#### Why
+
+Decouple API contracts from database entities.
+
+#### Implementation
+
+- NotificationValidation for input validation
+- NotificationDto for responses
+- Static method `create()` for conversion from entity
+
+### 4. Email Service Abstraction
+
+#### Why
+
+Separate email sending logic from message handling.
+
+#### Benefits
+
+✅ Easy to swap email providers  
+✅ Testable in isolation  
+✅ Reusable across the application  
+✅ Single responsibility principle
+
+### 5. OpenAPI Documentation
+
+#### Why
+Interactive API documentation for developers.
+
+#### Benefits
+
+✅ Always up-to-date with code  
+✅ Interactive testing via Swagger UI  
+✅ Clear API contract
+
+## 📝 Notes
+
+### Email Sending Simulation
+
+For this technical test, email sending is simulated with:
+
+- A 3-second delay (mimics usual latency)
+- A 10% random failure rate (tests retry mechanism)
+
+⚠️ Beware that due to this delay and the asynchronous processing of notifications, the `/send` API requests will return inconsistent data:
+- The `status` will still be `pending` although it will switch either to `sent` or `failed` 3 seconds later.
+- The `sentAt` timestamp will be undefined although if the sending succeeds, it will be set 3 seconds later as well.
