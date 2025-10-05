@@ -7,7 +7,6 @@ use App\Enum\NotificationStatus;
 use App\Message\EmailNotification;
 use App\Repository\NotificationRepository;
 use App\Validation\NotificationValidation;
-use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
