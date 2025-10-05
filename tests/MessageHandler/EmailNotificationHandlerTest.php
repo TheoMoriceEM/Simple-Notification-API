@@ -49,8 +49,8 @@ final class EmailNotificationHandlerTest extends KernelTestCase
         $handler->__invoke($this->message);
 
         // Assert
-        $this->assertEquals(NotificationStatus::SENT, $this->notification->getStatus());
-        $this->assertInstanceOf(\DateTimeImmutable::class, $this->notification->getSentAt());
+        self::assertEquals(NotificationStatus::SENT, $this->notification->getStatus());
+        self::assertInstanceOf(\DateTimeImmutable::class, $this->notification->getSentAt());
     }
 
     public function testEmailSendingFailed(): void
@@ -69,6 +69,6 @@ final class EmailNotificationHandlerTest extends KernelTestCase
         $handler->__invoke($this->message);
 
         // Assert
-        $this->assertEquals(NotificationStatus::FAILED, $this->notification->getStatus());
+        self::assertEquals(NotificationStatus::FAILED, $this->notification->getStatus());
     }
 }

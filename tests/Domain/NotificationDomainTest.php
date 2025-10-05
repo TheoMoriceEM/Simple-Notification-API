@@ -32,7 +32,7 @@ class NotificationDomainTest extends KernelTestCase
         $notifications = $this->domain->getNotifications();
 
         // Assert
-        $this->assertCount(2, $notifications);
+        self::assertCount(2, $notifications);
     }
 
     public function testCreateNotification(): void
@@ -53,11 +53,11 @@ class NotificationDomainTest extends KernelTestCase
         $notification = $this->domain->createNotification($validation);
 
         // Assert
-        $this->assertInstanceOf(Notification::class, $notification);
-        $this->assertEquals($data['recipientEmail'], $notification->getRecipientEmail());
-        $this->assertEquals($data['subject'], $notification->getSubject());
-        $this->assertEquals($data['body'], $notification->getBody());
-        $this->assertEquals(NotificationStatus::PENDING, $notification->getStatus());
+        self::assertInstanceOf(Notification::class, $notification);
+        self::assertEquals($data['recipientEmail'], $notification->getRecipientEmail());
+        self::assertEquals($data['subject'], $notification->getSubject());
+        self::assertEquals($data['body'], $notification->getBody());
+        self::assertEquals(NotificationStatus::PENDING, $notification->getStatus());
     }
 
     public function testSendAlreadySentNotification(): void

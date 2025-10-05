@@ -2,16 +2,16 @@
 
 namespace App\Controller;
 
+use App\Domain\NotificationDomain;
 use App\Dto\NotificationDto;
 use App\Entity\Notification;
-use OpenApi\Attributes as OA;
-use App\Domain\NotificationDomain;
 use App\Validation\NotificationValidation;
-use Symfony\Component\Routing\Attribute\Route;
+use OpenApi\Attributes as OA;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/api/notifications', name: 'api_notifications_')]
 #[OA\Tag(name: 'Notifications')]
